@@ -1,0 +1,56 @@
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build files
+bin/
+build/
+target/
+out/
+*.class
+
+# Logs
+*.log
+logs/
+
+# Maven / Gradle
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/
+mvnw
+mvnw.cmd
+gradle/
+gradlew
+gradlew.bat
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+*.bak
+
+# Database
+*.db
+*.sqlite
+
+# Local configuration
+application-local.properties
+application-dev.properties
