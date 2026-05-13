@@ -6,7 +6,8 @@ import hospital.repository.DepartmentRepository;
 import hospital.repository.PatientRepository;
 import hospital.service.DepartmentService;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DepartmentServiceImpl implements DepartmentService {
