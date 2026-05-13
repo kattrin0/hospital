@@ -63,7 +63,7 @@ public class PatientServiceImpl implements PatientService {
             patient.setGender(gender);
         }
         if (departmentId != null && !departmentId.equals(oldDepartmentId)) {
-            validateDepartment(departmentId);
+            checkDepartmentExists(departmentId);
             patient.setDepartmentId(departmentId);
 
             departmentRepository.updatePatientCount(oldDepartmentId, -1);
@@ -95,7 +95,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public List<Patient> getPatientsByDepartment(Long departmentId) {
-        validateDepartment(departmentId);
+        checkDepartmentExists(departmentId);
         return patientRepository.findByDepartmentId(departmentId);
     }
 
@@ -120,10 +120,10 @@ public class PatientServiceImpl implements PatientService {
         if (gender == null || (!gender.equals(MALE) && !gender.equals(FEMALE))) {
             throw new IllegalArgumentException("Пол должен быть М или Ж");
         }
-        validateDepartment(departmentId);
+        checkDepartmentExists(departmentId);
     }
 
-    private void validateDepartment(Long departmentId) {
+    private void checkDepartmentExists(Long departmentId) {
         if (!departmentRepository.existsById(departmentId)) {
             throw new IllegalArgumentException("Отделение не существует");
         }

@@ -13,36 +13,50 @@ public class HospitalConsoleController {
     private final DepartmentService departmentService;
     private final PatientService patientService;
     private final Scanner scanner;
+    private final Map<String, Runnable> mainMenuCommands;
+    private final Map<String, Runnable> departmentMenuCommands;
+    private final Map<String, Runnable> patientMenuCommands;
 
     public HospitalConsoleController(DepartmentService departmentService,
                                      PatientService patientService) {
         this.departmentService = departmentService;
         this.patientService = patientService;
         this.scanner = new Scanner(System.in);
+        this.mainMenuCommands = Map.of(
+                "1", this::manageDepartments,
+                "2", this::managePatients,
+                "3", this::viewAllDepartmentsWithPatients,
+                "4", this::viewAllPatientsWithDepartments
+        );
+        this.departmentMenuCommands = Map.of(
+                "1", this::addDepartment,
+                "2", this::updateDepartment,
+                "3", this::deleteDepartment,
+                "4", this::showAllDepartments
+        );
+        this.patientMenuCommands = Map.of(
+                "1", this::addPatient,
+                "2", this::updatePatient,
+                "3", this::deletePatient,
+                "4", this::showAllPatients,
+                "5", this::showPatientsByDepartment
+        );
     }
 
     public void start() {
-        while (true) {
+        boolean exit = false;
+        while (!exit) {
             printMainMenu();
             String choice = scanner.nextLine();
-
-            switch (choice) {
-                case "1":
-                    manageDepartments();
-                    break;
-                case "2":
-                    managePatients();
-                    break;
-                case "3":
-                    viewAllDepartmentsWithPatients();
-                    break;
-                case "4":
-                    viewAllPatientsWithDepartments();
-                    break;
-                case "0":
-                    return;
-                default:
-                    System.out.println("Неверный выбор. Попробуйте снова.");
+            if ("0".equals(choice)) {
+                exit = true;
+                continue;
+            }
+            Runnable command = mainMenuCommands.get(choice);
+            if (command != null) {
+                command.run();
+            } else {
+                System.out.println("Неверный выбор. Попробуйте снова.");
             }
         }
     }
@@ -58,7 +72,8 @@ public class HospitalConsoleController {
     }
 
     private void manageDepartments() {
-        while (true) {
+        boolean back = false;
+        while (!back) {
             System.out.println("\n--- УПРАВЛЕНИЕ ОТДЕЛЕНИЯМИ ---");
             System.out.println("1. Добавить отделение");
             System.out.println("2. Редактировать отделение");
@@ -68,25 +83,16 @@ public class HospitalConsoleController {
             System.out.print("Выберите действие: ");
 
             String choice = scanner.nextLine();
-
+            if ("0".equals(choice)) {
+                back = true;
+                continue;
+            }
+            Runnable command = departmentMenuCommands.get(choice);
             try {
-                switch (choice) {
-                    case "1":
-                        addDepartment();
-                        break;
-                    case "2":
-                        updateDepartment();
-                        break;
-                    case "3":
-                        deleteDepartment();
-                        break;
-                    case "4":
-                        showAllDepartments();
-                        break;
-                    case "0":
-                        return;
-                    default:
-                        System.out.println("Неверный выбор.");
+                if (command != null) {
+                    command.run();
+                } else {
+                    System.out.println("Неверный выбор.");
                 }
             } catch (Exception e) {
                 System.out.println("Ошибка: " + e.getMessage());
@@ -127,7 +133,8 @@ public class HospitalConsoleController {
     }
 
     private void managePatients() {
-        while (true) {
+        boolean back = false;
+        while (!back) {
             System.out.println("\n--- УПРАВЛЕНИЕ ПАЦИЕНТАМИ ---");
             System.out.println("1. Добавить пациента");
             System.out.println("2. Редактировать пациента");
@@ -138,28 +145,16 @@ public class HospitalConsoleController {
             System.out.print("Выберите действие: ");
 
             String choice = scanner.nextLine();
-
+            if ("0".equals(choice)) {
+                back = true;
+                continue;
+            }
+            Runnable command = patientMenuCommands.get(choice);
             try {
-                switch (choice) {
-                    case "1":
-                        addPatient();
-                        break;
-                    case "2":
-                        updatePatient();
-                        break;
-                    case "3":
-                        deletePatient();
-                        break;
-                    case "4":
-                        showAllPatients();
-                        break;
-                    case "5":
-                        showPatientsByDepartment();
-                        break;
-                    case "0":
-                        return;
-                    default:
-                        System.out.println("Неверный выбор.");
+                if (command != null) {
+                    command.run();
+                } else {
+                    System.out.println("Неверный выбор.");
                 }
             } catch (Exception e) {
                 System.out.println("Ошибка: " + e.getMessage());
