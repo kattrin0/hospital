@@ -13,6 +13,28 @@ import java.util.List;
 import java.util.Optional;
 
 public class JdbcDepartmentRepository implements DepartmentRepository {
+
+    private static final String INSERT_DEPARTMENT =
+            "INSERT INTO departments (name, patient_count) VALUES (?, ?)";
+
+    private static final String UPDATE_DEPARTMENT =
+            "UPDATE departments SET name = ?, patient_count = ? WHERE id = ?";
+
+    private static final String SELECT_DEPARTMENT =
+            "SELECT id, name, patient_count FROM departments WHERE id = ?";
+
+    private static final String SELECT_ALL_DEPARTMENTS =
+            "SELECT id, name, patient_count FROM departments ORDER BY id";
+
+    private static final String DELETE_DEPARTMENT =
+            "DELETE FROM departments WHERE id = ?";
+
+    private static final String EXIST_DEPARTMENT =
+            "SELECT 1 FROM departments WHERE id = ?";
+
+    private static final String UPDATE_PATIENT_COUNT =
+            "UPDATE departments SET patient_count = GREATEST(0, patient_count + ?) WHERE id = ?";
+
     private final JdbcConnectionFactory connectionFactory;
 
     public JdbcDepartmentRepository(JdbcConnectionFactory connectionFactory) {
@@ -24,8 +46,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
         try (Connection conn = connectionFactory.getConnection()) {
             if (entity.getId() == null) {
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO departments (name, patient_count) VALUES (?, ?)",
-                        Statement.RETURN_GENERATED_KEYS)) {
+                        INSERT_DEPARTMENT, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, entity.getName());
                     ps.setInt(2, entity.getPatientCount());
                     ps.executeUpdate();
@@ -36,8 +57,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
                     }
                 }
             } else {
-                try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE departments SET name = ?, patient_count = ? WHERE id = ?")) {
+                try (PreparedStatement ps = conn.prepareStatement(UPDATE_DEPARTMENT)) {
                     ps.setString(1, entity.getName());
                     ps.setInt(2, entity.getPatientCount());
                     ps.setLong(3, entity.getId());
@@ -53,7 +73,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
     @Override
     public Optional<Department> findById(Long id) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT id, name, patient_count FROM departments WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(SELECT_DEPARTMENT)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -69,7 +89,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
     @Override
     public List<Department> findAll() {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT id, name, patient_count FROM departments ORDER BY id");
+             PreparedStatement ps = conn.prepareStatement(SELECT_ALL_DEPARTMENTS);
              ResultSet rs = ps.executeQuery()) {
             List<Department> list = new ArrayList<>();
             while (rs.next()) {
@@ -84,7 +104,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
     @Override
     public void deleteById(Long id) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("DELETE FROM departments WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(DELETE_DEPARTMENT)) {
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -95,7 +115,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
     @Override
     public boolean existsById(Long id) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM departments WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(EXIST_DEPARTMENT)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -108,8 +128,7 @@ public class JdbcDepartmentRepository implements DepartmentRepository {
     @Override
     public void updatePatientCount(Long departmentId, int delta) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "UPDATE departments SET patient_count = GREATEST(0, patient_count + ?) WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(UPDATE_PATIENT_COUNT)) {
             ps.setInt(1, delta);
             ps.setLong(2, departmentId);
             ps.executeUpdate();

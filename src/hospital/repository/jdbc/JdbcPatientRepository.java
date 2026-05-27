@@ -13,6 +13,28 @@ import java.util.List;
 import java.util.Optional;
 
 public class JdbcPatientRepository implements PatientRepository {
+
+    private static final String INSERT_PATIENT =
+            "INSERT INTO patients (full_name, age, gender, department_id) VALUES (?, ?, ?, ?)";
+
+    private static final String UPDATE_PATIENT =
+            "UPDATE patients SET full_name = ?, age = ?, gender = ?, department_id = ? WHERE id = ?";
+
+    private static final String SELECT_PATIENT =
+            "SELECT id, full_name, age, gender, department_id FROM patients WHERE id = ?";
+
+    private static final String SELECT_ALL_PATIENTS =
+            "SELECT id, full_name, age, gender, department_id FROM patients ORDER BY id";
+
+    private static final String DELETE_PATIENT =
+            "DELETE FROM patients WHERE id = ?";
+
+    private static final String EXIST_PATIENT =
+            "SELECT 1 FROM patients WHERE id = ?";
+
+    private static final String SELECT_PATIENTS_BY_DEPARTMENT =
+            "SELECT id, full_name, age, gender, department_id FROM patients WHERE department_id = ? ORDER BY id";
+
     private final JdbcConnectionFactory connectionFactory;
 
     public JdbcPatientRepository(JdbcConnectionFactory connectionFactory) {
@@ -24,8 +46,7 @@ public class JdbcPatientRepository implements PatientRepository {
         try (Connection conn = connectionFactory.getConnection()) {
             if (entity.getId() == null) {
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO patients (full_name, age, gender, department_id) VALUES (?, ?, ?, ?)",
-                        Statement.RETURN_GENERATED_KEYS)) {
+                        INSERT_PATIENT, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, entity.getFullName());
                     ps.setInt(2, entity.getAge());
                     ps.setString(3, entity.getGender());
@@ -38,8 +59,7 @@ public class JdbcPatientRepository implements PatientRepository {
                     }
                 }
             } else {
-                try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE patients SET full_name = ?, age = ?, gender = ?, department_id = ? WHERE id = ?")) {
+                try (PreparedStatement ps = conn.prepareStatement(UPDATE_PATIENT)) {
                     ps.setString(1, entity.getFullName());
                     ps.setInt(2, entity.getAge());
                     ps.setString(3, entity.getGender());
@@ -57,8 +77,7 @@ public class JdbcPatientRepository implements PatientRepository {
     @Override
     public Optional<Patient> findById(Long id) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT id, full_name, age, gender, department_id FROM patients WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(SELECT_PATIENT)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -74,8 +93,7 @@ public class JdbcPatientRepository implements PatientRepository {
     @Override
     public List<Patient> findAll() {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT id, full_name, age, gender, department_id FROM patients ORDER BY id");
+             PreparedStatement ps = conn.prepareStatement(SELECT_ALL_PATIENTS);
              ResultSet rs = ps.executeQuery()) {
             List<Patient> list = new ArrayList<>();
             while (rs.next()) {
@@ -90,7 +108,7 @@ public class JdbcPatientRepository implements PatientRepository {
     @Override
     public void deleteById(Long id) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("DELETE FROM patients WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(DELETE_PATIENT)) {
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -101,7 +119,7 @@ public class JdbcPatientRepository implements PatientRepository {
     @Override
     public boolean existsById(Long id) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM patients WHERE id = ?")) {
+             PreparedStatement ps = conn.prepareStatement(EXIST_PATIENT)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -114,8 +132,7 @@ public class JdbcPatientRepository implements PatientRepository {
     @Override
     public List<Patient> findByDepartmentId(Long departmentId) {
         try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT id, full_name, age, gender, department_id FROM patients WHERE department_id = ? ORDER BY id")) {
+             PreparedStatement ps = conn.prepareStatement(SELECT_PATIENTS_BY_DEPARTMENT)) {
             ps.setLong(1, departmentId);
             try (ResultSet rs = ps.executeQuery()) {
                 List<Patient> list = new ArrayList<>();
