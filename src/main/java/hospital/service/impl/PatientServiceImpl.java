@@ -14,8 +14,8 @@ public class PatientServiceImpl implements PatientService {
 
     private static final int MIN_AGE = 1;
     private static final int MAX_AGE = 150;
-    private static final String MALE = "М";
-    private static final String FEMALE = "Ж";
+    private static final String MALE = "MALE";
+    private static final String FEMALE = "FEMALE";
 
     private final PatientRepository patientRepository;
     private final DepartmentRepository departmentRepository;
